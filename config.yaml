@@ -1,0 +1,13 @@
+state_size: 100
+action_size: 20
+k: 2
+theta: 3
+episodes: 500
+time_units_per_episode: 10000
+debug: false
+alpha: 1
+beta: 1
+initial_inventory: 10
+lead_time: 2
+expiration_time: 5
+max_inventory: 50
