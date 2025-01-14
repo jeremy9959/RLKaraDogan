@@ -1,7 +1,7 @@
 import collections
 
 class SupplyChain:
-    def __init__(self, initial_inventory=0, lead_time=1, expiration_time=10, alpha=1, beta=1, max_inventory=50):
+    def __init__(self, initial_inventory=0, lead_time=1, expiration_time=10, alpha=1, beta=1):
         """
         Initialize the supply chain with an initial inventory level, lead time, expiration time, and cost weights.
         
@@ -10,7 +10,6 @@ class SupplyChain:
         :param expiration_time: Time after which units expire
         :param alpha: Weight for unmet demand in cost calculation
         :param beta: Weight for expired units in cost calculation
-        :param max_inventory: Maximum inventory level
         """
         if expiration_time <= lead_time:
             raise ValueError("Expiration time must be greater than lead time.")
@@ -21,7 +20,6 @@ class SupplyChain:
         self.expiration_time = expiration_time
         self.alpha = alpha
         self.beta = beta
-        self.max_inventory = max_inventory
         self.time = 0
         self.unmet_demand = 0
         self.expired_units = 0
