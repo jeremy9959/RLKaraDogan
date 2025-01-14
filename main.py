@@ -1,4 +1,5 @@
 import numpy as np
+import yaml
 from supply_chain import SupplyChain
 from q_learning_agent import QLearningAgent
 from bokeh.plotting import figure, show
@@ -6,21 +7,32 @@ from bokeh.layouts import column
 from bokeh.io import save
 
 def main():
+    # Load configuration from YAML file
+    with open("config.yaml", "r") as file:
+        config = yaml.safe_load(file)
+    
+    # Extract parameters from configuration
+    state_size = config["state_size"]
+    action_size = config["action_size"]
+    k = config["k"]
+    theta = config["theta"]
+    episodes = config["episodes"]
+    time_units_per_episode = config["time_units_per_episode"]
+    debug = config["debug"]
+    alpha = config["alpha"]
+    beta = config["beta"]
+    initial_inventory = config["initial_inventory"]
+    lead_time = config["lead_time"]
+    expiration_time = config["expiration_time"]
+    max_inventory = config["max_inventory"]
+    learning_rate = config["learning_rate"]
+    discount_factor = config["discount_factor"]
+    exploration_rate = config["exploration_rate"]
+    exploration_decay = config["exploration_decay"]
+    min_exploration_rate = config["min_exploration_rate"]
+    
     # Initialize the Q-learning agent
-    state_size = 100  # Example state size (total inventory levels)
-    action_size = 20  # Example action size (possible replenishment order quantities)
-    agent = QLearningAgent(state_size, action_size)
-    
-    # Parameters for the gamma distribution
-    k = 2
-    theta = 3
-    
-    # Number of episodes and time units per episode
-    episodes = 500
-    time_units_per_episode = 10000
-    
-    # Debug flag
-    debug = False
+    agent = QLearningAgent(state_size, action_size, learning_rate, discount_factor, exploration_rate, exploration_decay, min_exploration_rate)
     
     # Track total rewards for each episode
     rewards_per_episode = []
@@ -33,7 +45,7 @@ def main():
     
     for episode in range(episodes):
         # Initialize the supply chain for each episode
-        supply_chain = SupplyChain(initial_inventory=10, lead_time=2, expiration_time=5, alpha=1, beta=1)
+        supply_chain = SupplyChain(initial_inventory=initial_inventory, lead_time=lead_time, expiration_time=expiration_time, alpha=alpha, beta=beta, max_inventory=max_inventory)
         
         # Initialize total rewards for the episode
         total_rewards = 0
@@ -57,7 +69,7 @@ def main():
             demand = int(np.random.gamma(k, theta))
             
             # Get the current state (total inventory)
-            state = supply_chain.get_total_inventory()
+            state = supply_chain.check_inventory()
             
             # Choose an action (replenishment order quantity) based on the current state
             action = agent.choose_action(state)
@@ -116,13 +128,13 @@ def main():
         "unmet_demand": []
     }
     
-    supply_chain = SupplyChain(initial_inventory=20, lead_time=3, expiration_time=5, alpha=1, beta=1)
+    supply_chain = SupplyChain(initial_inventory=initial_inventory, lead_time=lead_time, expiration_time=expiration_time, alpha=alpha, beta=beta, max_inventory=max_inventory)
     for t in range(time_units_per_episode):
         # Generate demand from a gamma distribution
         demand = int(np.random.gamma(k, theta))
         
         # Get the current state (total inventory)
-        state = supply_chain.get_total_inventory()
+        state = supply_chain.check_inventory()
         
         # Choose an action (replenishment order quantity) based on the current state
         action = agent.choose_action(state)

@@ -113,17 +113,9 @@ class SupplyChain:
             self.discard_expired_units()
             self.place_replenishment_order(replenishment_order)
         
-        new_total_inventory = self.get_total_inventory()
+        new_total_inventory = self.check_inventory()
         reward = -self.calculate_inventory_cost()
         return new_total_inventory, reward
-
-    def get_total_inventory(self):
-        """
-        Get the current total inventory level.
-        
-        :return: Current total inventory level
-        """
-        return self.check_inventory()
 
     def get_average_inventory_age(self):
         """
@@ -145,7 +137,7 @@ class SupplyChain:
         """
         state = {
             "time": self.time,
-            "total_inventory": self.get_total_inventory(),
+            "total_inventory": self.check_inventory(),
             "average_inventory_age": self.get_average_inventory_age(),
             "orders": list(self.orders),
             "inventory": list(self.inventory),
