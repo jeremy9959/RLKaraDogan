@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 class QLearningAgent:
-    def __init__(self, state_size, action_size, learning_rate=0.3, learning_rate_decay=.999, discount_factor=0.99, exploration_rate=1.0, exploration_decay=0.95, min_exploration_rate=0.0):
+    def __init__(self, state_size, action_size, learning_rate=0.3, learning_rate_decay_parameter=.999, discount_factor=0.99, exploration_rate=1.0, exploration_decay_parameter=0.95, min_exploration_rate=0.0):
         """
         Initialize the Q-learning agent.
         
@@ -17,12 +17,13 @@ class QLearningAgent:
         self.state_size = state_size
         self.action_size = action_size
         self.learning_rate = learning_rate
-        self.learning_rate_decay = learning_rate_decay
+        self.learning_rate_decay_parameter = learning_rate_decay_parameter
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
-        self.exploration_decay = exploration_decay
+        self.exploration_decay_parameter = exploration_decay_parameter
         self.min_exploration_rate = min_exploration_rate
         self.q_table = np.zeros((state_size, action_size))
+        self.q_table.fill(10000)
 
     def choose_action(self, state):
         """
@@ -48,20 +49,27 @@ class QLearningAgent:
         :param next_state: Next state
         """
         max_value = np.max(self.q_table[next_state])
-        max_actions = np.where(self.q_table[next_state] == max_value)[0]
-        best_next_action = random.choice(max_actions)
-        td_target = reward + self.discount_factor * self.q_table[next_state][best_next_action]
+        td_target = reward + self.discount_factor * max_value
         td_error = td_target - self.q_table[state][action]
-        self.q_table[state][action] += self.learning_rate * td_error
+        self.q_table[state][action] += (self.learning_rate * td_error)
 
-    def decay_exploration_rate(self):
+
+    def decay(self,param, delta,time):
+        """
+        Decays the parameter according to the Kara-Dogan rule
+        """
+        y=time**2/(delta+time)
+        new_param = param/(1+y)
+        return new_param
+    
+    def decay_exploration_rate(self, time):
         """
         Decay the exploration rate.
         """
-        self.exploration_rate = max(self.min_exploration_rate, self.exploration_rate * self.exploration_decay)
+        self.exploration_rate = max(self.min_exploration_rate, self.decay(self.exploration_rate,self.exploration_decay_parameter,time))
 
-    def decay_learning_rate(self):
+    def decay_learning_rate(self, time):
         """
         Decay the learning rate.
         """
-        self.learning_rate = self.learning_rate * self.learning_rate_decay
+        self.learning_rate = self.decay(self.learning_rate,self.learning_rate_decay_parameter,time)

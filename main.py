@@ -7,6 +7,7 @@ from bokeh.layouts import column
 from bokeh.io import save
 import seaborn as sns
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 
 def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode):
@@ -22,6 +23,7 @@ def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episo
     """
     episode_data = {
         "time": [],
+        "reward": [],
         "inventory_size": [],
         "demand": [],
         "expired_units": [],
@@ -44,6 +46,7 @@ def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episo
         
         # Collect data for plotting
         episode_data["time"].append(t)
+        episode_data["reward"].append(reward)
         episode_data["inventory_size"].append(new_total_inventory)
         episode_data["demand"].append(demand)
         episode_data["expired_units"].append(supply_chain.expired_units)
@@ -101,14 +104,14 @@ def main():
     lead_time = config["lead_time"]
     expiration_time = config["expiration_time"]
     learning_rate = config["learning_rate"]
-    learning_rate_decay = config["learning_rate_decay"]
+    learning_rate_decay_parameter = config["learning_rate_decay_parameter"]
     discount_factor = config["discount_factor"]
     exploration_rate = config["exploration_rate"]
-    exploration_decay = config["exploration_decay"]
+    exploration_decay_parameter = config["exploration_decay_parameter"]
     min_exploration_rate = config["min_exploration_rate"]
     
     # Initialize the Q-learning agent
-    agent = QLearningAgent(state_size, action_size, learning_rate, learning_rate_decay, discount_factor, exploration_rate, exploration_decay, min_exploration_rate)
+    agent = QLearningAgent(state_size, action_size, learning_rate, learning_rate_decay_parameter, discount_factor, exploration_rate, exploration_decay_parameter, min_exploration_rate)
     
     # Track total rewards for each episode
     rewards_per_episode = []
@@ -119,7 +122,7 @@ def main():
     # Track the number of units ordered for each inventory level
     inventory_order_data = np.zeros((state_size, action_size))
     
-    for episode in range(episodes):
+    for episode in tqdm(range(episodes)):
         # Initialize the supply chain for each episode
         supply_chain = SupplyChain(initial_inventory=initial_inventory, lead_time=lead_time, expiration_time=expiration_time, alpha=alpha, beta=beta)
        
@@ -186,8 +189,8 @@ def main():
                 print("-" * 40)
         
         # Decay the exploration rate at the end of each episode
-        agent.decay_exploration_rate()
-        agent.decay_learning_rate()
+        agent.decay_exploration_rate(episode)
+        agent.decay_learning_rate(episode)
         
         # Track the total rewards for the episode
         rewards_per_episode.append(total_rewards/time_units_per_episode)
@@ -199,6 +202,7 @@ def main():
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
     plot_q_table_heatmap(agent.q_table[:50,:])
+    run_episode_for_plotting(agent,supply_chain, k, theta, time_units_per_episode)
 
 
 def plot_total_rewards(rewards_per_episode):
@@ -221,9 +225,7 @@ def plot_q_table_heatmap(q_table):
     :param q_table: The Q-table to visualize
     """
     plt.figure(figsize=(12, 8))
-    sns.heatmap(q_table, cmap='RdYlBu_r', center=0, annot=True, fmt='.2f', 
-                xticklabels=[f'A{i}' for i in range(q_table.shape[1])],
-                yticklabels=[f'S{i}' for i in range(q_table.shape[0])])
+    sns.heatmap(q_table, cmap='viridis', center=0)
     plt.title('Q-table Heatmap')
     plt.xlabel('Actions')
     plt.ylabel('States')
