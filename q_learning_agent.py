@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 class QLearningAgent:
-    def __init__(self, state_size, action_size, learning_rate=0.3, discount_factor=0.99, exploration_rate=1.0, exploration_decay=0.95, min_exploration_rate=0.0):
+    def __init__(self, state_size, action_size, learning_rate=0.3, learning_rate_decay=.999, discount_factor=0.99, exploration_rate=1.0, exploration_decay=0.95, min_exploration_rate=0.0):
         """
         Initialize the Q-learning agent.
         
@@ -17,6 +17,7 @@ class QLearningAgent:
         self.state_size = state_size
         self.action_size = action_size
         self.learning_rate = learning_rate
+        self.learning_rate_decay = learning_rate_decay
         self.discount_factor = discount_factor
         self.exploration_rate = exploration_rate
         self.exploration_decay = exploration_decay
@@ -58,3 +59,9 @@ class QLearningAgent:
         Decay the exploration rate.
         """
         self.exploration_rate = max(self.min_exploration_rate, self.exploration_rate * self.exploration_decay)
+
+    def decay_learning_rate(self):
+        """
+        Decay the learning rate.
+        """
+        self.learning_rate = self.learning_rate * self.learning_rate_decay

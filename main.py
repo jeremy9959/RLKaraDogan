@@ -5,6 +5,8 @@ from q_learning_agent import QLearningAgent
 from bokeh.plotting import figure, show
 from bokeh.layouts import column
 from bokeh.io import save
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode):
@@ -99,13 +101,14 @@ def main():
     lead_time = config["lead_time"]
     expiration_time = config["expiration_time"]
     learning_rate = config["learning_rate"]
+    learning_rate_decay = config["learning_rate_decay"]
     discount_factor = config["discount_factor"]
     exploration_rate = config["exploration_rate"]
     exploration_decay = config["exploration_decay"]
     min_exploration_rate = config["min_exploration_rate"]
     
     # Initialize the Q-learning agent
-    agent = QLearningAgent(state_size, action_size, learning_rate, discount_factor, exploration_rate, exploration_decay, min_exploration_rate)
+    agent = QLearningAgent(state_size, action_size, learning_rate, learning_rate_decay, discount_factor, exploration_rate, exploration_decay, min_exploration_rate)
     
     # Track total rewards for each episode
     rewards_per_episode = []
@@ -184,20 +187,19 @@ def main():
         
         # Decay the exploration rate at the end of each episode
         agent.decay_exploration_rate()
+        agent.decay_learning_rate()
         
         # Track the total rewards for the episode
         rewards_per_episode.append(total_rewards/time_units_per_episode)
         
         # Report the total rewards and epsilon for the episode
-        print(f"Episode {episode + 1} - Total Rewards: {total_rewards:.2f}, Epsilon: {agent.exploration_rate:.4f}")
+        print(f"Episode {episode + 1} - Total Rewards: {total_rewards/time_units_per_episode:.2f}, Epsilon: {agent.exploration_rate:.4f}, Learning Rate: {agent.learning_rate:.4f}")
         print("=" * 40)
     
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
-    
-    # Run one additional episode and collect data for plotting
-    # additional_episode_data = run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
-    
+    plot_q_table_heatmap(agent.q_table[:50,:])
+
 
 def plot_total_rewards(rewards_per_episode):
     """
@@ -211,6 +213,23 @@ def plot_total_rewards(rewards_per_episode):
     # Display the plot
 
     show(p2)
+
+def plot_q_table_heatmap(q_table):
+    """
+    Create a heatmap visualization of the Q-table.
+    
+    :param q_table: The Q-table to visualize
+    """
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(q_table, cmap='RdYlBu_r', center=0, annot=True, fmt='.2f', 
+                xticklabels=[f'A{i}' for i in range(q_table.shape[1])],
+                yticklabels=[f'S{i}' for i in range(q_table.shape[0])])
+    plt.title('Q-table Heatmap')
+    plt.xlabel('Actions')
+    plt.ylabel('States')
+    plt.tight_layout()
+    plt.savefig('q_table_heatmap.png')
+    plt.close()
 
 
 if __name__ == "__main__":
