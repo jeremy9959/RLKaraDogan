@@ -1,6 +1,6 @@
 state_size: 100
 action_size: 20
-k: 2
+k: 4
 theta: 3
 episodes: 250
 time_units_per_episode: 100000
@@ -13,6 +13,6 @@ learning_rate: .6
 learning_rate_decay_parameter: 1000000
 expiration_time: 5
 discount_factor: .9
-exploration_rate: .6
+exploration_rate: 1.0
 exploration_decay_parameter: 1000
-min_exploration_rate: .01
+min_exploration_rate: 1.0
