@@ -2,9 +2,11 @@ state_size: 100
 action_size: 20
 k: 4
 theta: 3
-episodes: 250
-time_units_per_episode: 100000
+episodes: 200
+time_units_per_episode: 10000
 debug: false
+logging: false
+progress_bar: true
 alpha: 1
 beta: 1
 initial_inventory: 10
@@ -15,4 +17,5 @@ expiration_time: 5
 discount_factor: .9
 exploration_rate: 1.0
 exploration_decay_parameter: 1000
-min_exploration_rate: 1.0
+min_exploration_rate: .01
+trajectory_file: "trajectory.csv"

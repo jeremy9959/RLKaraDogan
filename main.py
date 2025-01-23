@@ -176,6 +176,12 @@ def main():
     exploration_rate = config["exploration_rate"]
     exploration_decay_parameter = config["exploration_decay_parameter"]
     min_exploration_rate = config["min_exploration_rate"]
+    logging = config["logging"]
+    progress_bar = config["progress_bar"]
+    trajectory_file_name = config["trajectory_file"]
+
+    # Open the trajectory file for writing
+    trajectory_file = open(trajectory_file_name, "w")
 
     # Initialize the Q-learning agent
     agent = QLearningAgent(
@@ -198,7 +204,10 @@ def main():
     # Track the number of units ordered for each inventory level
     inventory_order_data = np.zeros((state_size, action_size))
 
-    for episode in tqdm(range(episodes)):
+    # progress bars if lprogress_bar flag set to True in config.yaml
+    episode_range = tqdm(range(episodes)) if progress_bar else range(episodes)
+
+    for episode in episode_range:
         # Initialize the supply chain for each episode
         supply_chain = SupplyChain(
             initial_inventory=initial_inventory,
@@ -246,6 +255,8 @@ def main():
             # Get the next state (new total inventory)
             next_state = new_total_inventory
 
+            trajectory_file.write(f"{state},{action},{reward},{next_state}\n")
+
             # Update the Q-table
             agent.update_q_table(state, action, reward, next_state)
 
@@ -278,11 +289,12 @@ def main():
         # Track the total rewards for the episode
         rewards_per_episode.append(total_rewards / time_units_per_episode)
 
-        # Report the total rewards and epsilon for the episode
-        print(
-            f"Episode {episode + 1} - Total Rewards: {total_rewards/time_units_per_episode:.2f}, Epsilon: {agent.exploration_rate:.4f}, Learning Rate: {agent.learning_rate:.4f}"
-        )
-        print("=" * 40)
+        # Report the total rewards and epsilon for the episode if logging flag is True in config.yaml
+        if logging:
+            print(
+                f"Episode {episode + 1} - Total Rewards: {total_rewards/time_units_per_episode:.2f}, Epsilon: {agent.exploration_rate:.4f}, Learning Rate: {agent.learning_rate:.4f}"
+            )
+            print("=" * 40)
 
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
