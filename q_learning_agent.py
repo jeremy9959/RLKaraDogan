@@ -23,7 +23,7 @@ class QLearningAgent:
         self.exploration_decay_parameter = exploration_decay_parameter
         self.min_exploration_rate = min_exploration_rate
         self.q_table = np.zeros((state_size, action_size))
-        self.q_table.fill(10000)
+        self.q_table.fill(0)
 
     def choose_action(self, state):
         """
@@ -72,4 +72,5 @@ class QLearningAgent:
         """
         Decay the learning rate.
         """
-        self.learning_rate = self.decay(self.learning_rate,self.learning_rate_decay_parameter,time)
+   #     self.learning_rate = self.decay(self.learning_rate,self.learning_rate_decay_parameter,time)
+        return self.learning_rate

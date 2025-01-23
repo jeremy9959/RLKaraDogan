@@ -5,6 +5,7 @@ from q_learning_agent import QLearningAgent
 from bokeh.plotting import figure, show
 from bokeh.layouts import column
 from bokeh.io import save
+from bokeh.models import ColorBar, BasicTicker, LinearColorMapper
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
@@ -196,13 +197,15 @@ def main():
         rewards_per_episode.append(total_rewards/time_units_per_episode)
         
         # Report the total rewards and epsilon for the episode
-        print(f"Episode {episode + 1} - Total Rewards: {total_rewards/time_units_per_episode:.2f}, Epsilon: {agent.exploration_rate:.4f}, Learning Rate: {agent.learning_rate:.4f}")
-        print("=" * 40)
+       # print(f"Episode {episode + 1} - Total Rewards: {total_rewards/time_units_per_episode:.2f}, Epsilon: {agent.exploration_rate:.4f}, Learning Rate: {agent.learning_rate:.4f}")
+        #print("=" * 40)
     
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
     plot_q_table_heatmap(agent.q_table[:50,:])
-    run_episode_for_plotting(agent,supply_chain, k, theta, time_units_per_episode)
+    p1 = plot_total_rewards(rewards_per_episode)
+    p2 = plot_q_table_contour(agent.q_table[:30,:])
+    show(column(p1, p2))
 
 
 def plot_total_rewards(rewards_per_episode):
@@ -216,7 +219,7 @@ def plot_total_rewards(rewards_per_episode):
     
     # Display the plot
 
-    show(p2)
+    return p2
 
 def plot_q_table_heatmap(q_table):
     """
@@ -233,6 +236,45 @@ def plot_q_table_heatmap(q_table):
     plt.savefig('q_table_heatmap.png')
     plt.close()
 
+def plot_q_table_contour(q_table):
+    """
+    Create a contour plot visualization of the Q-table using Bokeh.
+    
+    :param q_table: The Q-table to visualize
+    """
+    # Create data for contour plot
+    x = np.arange(q_table.shape[1])
+    y = np.arange(q_table.shape[0])
+    xx, yy = np.meshgrid(x, y)
+    
+    # Create color mapper
+    mapper = LinearColorMapper(palette="Viridis256", 
+                             low=q_table.min(), 
+                             high=q_table.max())
+    
+    # Create figure
+    p = figure(title="Q-table Contour Map",
+              x_axis_label="Actions",
+              y_axis_label="States",
+              width=800,
+              height=600)
+    
+    # Add contour
+    p.image(image=[q_table],
+            x=0, y=0,
+            dw=q_table.shape[1],
+            dh=q_table.shape[0],
+            color_mapper=mapper)
+    
+    # Add colorbar
+    color_bar = ColorBar(color_mapper=mapper,
+                        ticker=BasicTicker(),
+                        label_standoff=12,
+                        border_line_color=None,
+                        location=(0,0))
+    
+    p.add_layout(color_bar, 'right')
+    return p
 
 if __name__ == "__main__":
     main()
