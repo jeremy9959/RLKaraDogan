@@ -8,6 +8,8 @@ from bokeh.io import save
 import seaborn as sns
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import os
+from datetime import datetime
 
 
 def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode):
@@ -179,9 +181,11 @@ def main():
     logging = config["logging"]
     progress_bar = config["progress_bar"]
     trajectory_file_name = config["trajectory_file"]
+    tracking = config["tracking"]
 
     # Open the trajectory file for writing
-    trajectory_file = open(trajectory_file_name, "w")
+    if tracking:
+        trajectory_file = open(trajectory_file_name, "w")
 
     # Initialize the Q-learning agent
     agent = QLearningAgent(
@@ -255,10 +259,12 @@ def main():
             # Get the next state (new total inventory)
             next_state = new_total_inventory
 
-            trajectory_file.write(f"{state},{action},{reward},{next_state}\n")
+            if tracking:
+                trajectory_file.write(f"{state},{action},{reward},{next_state}\n")
 
             # Update the Q-table
             agent.update_q_table(state, action, reward, next_state)
+            agent.update_v_table(state,reward, next_state)
 
             # Accumulate the reward
             total_rewards += reward
@@ -296,9 +302,23 @@ def main():
             )
             print("=" * 40)
 
+    # Create a directory labelled with the time and date of the run
+    run_directory = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    os.makedirs(run_directory, exist_ok=True)
+
+    # Save a copy of the config.yaml file in the directory
+    with open(os.path.join(run_directory, "config.yaml"), "w") as file:
+        yaml.dump(config, file)
+
+    # Save a copy of the trained q_table in the directory
+    np.save(os.path.join(run_directory, "q_table.npy"), agent.q_table)
+    np.save(os.path.join(run_directory, "v_table.npy"), agent.v_table)
+    np.save(os.path.join(run_directory, "inventory_order_data.npy"), inventory_order_data)
+
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
     plot_q_table_heatmap(agent.q_table[:50, :])
+    plot_v_table(agent.v_table)
     run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
 
 
@@ -323,6 +343,23 @@ def plot_total_rewards(rewards_per_episode):
     # Display the plot
 
     show(p2)
+
+def plot_v_table(v_table):
+    """
+    Create a bar plot of the v_table using bokeh
+
+    :param v_table: The V-table to visualize
+    """
+    p3 = figure(
+        title="V-table",
+        x_axis_label="States",
+        y_axis_label="Values",
+        x_range=(0, len(v_table)),
+    )
+    p3.vbar(x=list(range(len(v_table))), top=v_table, width=0.9)
+    show(p3)
+    
+
 
 
 def plot_q_table_heatmap(q_table):
