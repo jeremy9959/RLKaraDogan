@@ -1,5 +1,6 @@
 import numpy as np
-import random
+from numpy import random
+from scipy.special import softmax
 
 
 class QLearningAgent:
@@ -34,8 +35,8 @@ class QLearningAgent:
         self.exploration_decay_parameter = exploration_decay_parameter
         self.min_exploration_rate = min_exploration_rate
         self.q_table = np.zeros((state_size, action_size))
-        self.q_table.fill(-50)
         self.v_table = np.zeros(state_size)
+        self.rng = random.default_rng()
 
     def choose_action(self, state):
         """
@@ -45,11 +46,11 @@ class QLearningAgent:
         :return: Action to take
         """
         if random.uniform(0, 1) < self.exploration_rate:
-            return random.randint(0, self.action_size - 1)
-        else:
-            max_value = np.max(self.q_table[state])
-            max_actions = np.where(self.q_table[state] == max_value)[0]
-            return random.choice(max_actions)
+            return self.rng.integers(0, self.action_size)
+        else:   
+            probs = softmax(self.q_table[state])
+            draw = self.rng.choice(self.action_size, p=probs)
+            return draw
 
     def update_q_table(self, state, action, reward, next_state):
         """
