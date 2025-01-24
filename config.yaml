@@ -1,4 +1,4 @@
-state_size: 100
+state_size: 40
 action_size: 20
 k: 5
 theta: 3
@@ -15,7 +15,7 @@ lead_time: 1
 learning_rate: .8
 learning_rate_decay_parameter: 1000000
 expiration_time: 2
-discount_factor: .9
+discount_factor: .5
 exploration_rate: 1.0
 exploration_decay_parameter: 500000
 min_exploration_rate: .0001

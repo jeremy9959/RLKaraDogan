@@ -33,7 +33,8 @@ class QLearningAgent:
         self.exploration_rate = exploration_rate
         self.exploration_decay_parameter = exploration_decay_parameter
         self.min_exploration_rate = min_exploration_rate
-        self.q_table = np.zeros(state_size, action_size)
+        self.q_table = np.zeros((state_size, action_size))
+        self.q_table.fill(-50)
         self.v_table = np.zeros(state_size)
 
     def choose_action(self, state):
@@ -64,15 +65,18 @@ class QLearningAgent:
         td_error = td_target - self.q_table[state][action]
         self.q_table[state][action] += self.learning_rate * td_error
 
-    def update_v_table(self, state, reward):
+    def update_v_table(self, state, reward, next_state):
         """
         Update the V-table based on the reward received.
 
         :param state: Current state
         :param reward: Reward received
         """
-        self.v_table[state] = (1-self.learning_rate)*self.v_table[state] + self.learning_rate*reward
-
+        self.v_table[state] = (1 - self.learning_rate) * self.v_table[
+            state
+        ] + self.learning_rate * (
+            reward + self.discount_factor * self.v_table[next_state]
+        )
 
     def decay(self, param, delta, time):
         """

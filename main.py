@@ -69,6 +69,7 @@ def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episo
         legend_label="Inventory Size",
         line_width=2,
     )
+    p5.legend.location = "top_left"
 
     # Create histograms for units ordered, units expired, and unmet demand
     p6 = figure(
@@ -264,7 +265,7 @@ def main():
 
             # Update the Q-table
             agent.update_q_table(state, action, reward, next_state)
-            agent.update_v_table(state,reward, next_state)
+            agent.update_v_table(state,reward,next_state)
 
             # Accumulate the reward
             total_rewards += reward
@@ -313,7 +314,7 @@ def main():
     # Save a copy of the trained q_table in the directory
     np.save(os.path.join(run_directory, "q_table.npy"), agent.q_table)
     np.save(os.path.join(run_directory, "v_table.npy"), agent.v_table)
-    np.save(os.path.join(run_directory, "inventory_order_data.npy"), inventory_order_data)
+   
 
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
@@ -339,7 +340,7 @@ def plot_total_rewards(rewards_per_episode):
         legend_label="Total Rewards",
         line_width=2,
     )
-
+    p2.legend.location = "top_left"
     # Display the plot
 
     show(p2)
