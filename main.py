@@ -265,7 +265,7 @@ def main():
 
             # Update the Q-table
             agent.update_q_table(state, action, reward, next_state)
-            agent.update_v_table(state,reward,next_state)
+            agent.update_v_table(state, reward, next_state)
 
             # Accumulate the reward
             total_rewards += reward
@@ -314,13 +314,12 @@ def main():
     # Save a copy of the trained q_table in the directory
     np.save(os.path.join(run_directory, "q_table.npy"), agent.q_table)
     np.save(os.path.join(run_directory, "v_table.npy"), agent.v_table)
-   
 
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
-    #plot_q_table_heatmap(agent.q_table[:50, :])
-    plot_v_table(agent.v_table)
-    #run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
+    plot_q_table_heatmap(agent.q_table[:39, :])
+    plot_v_table(agent.v_table, k, theta)
+    # run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
 
 
 def plot_total_rewards(rewards_per_episode):
@@ -345,22 +344,21 @@ def plot_total_rewards(rewards_per_episode):
 
     show(p2)
 
-def plot_v_table(v_table):
+
+def plot_v_table(v_table, k, theta):
     """
     Create a bar plot of the v_table using bokeh
 
     :param v_table: The V-table to visualize
     """
     p3 = figure(
-        title="V-table",
+        title=f"V-table k={k}, theta={theta}",
         x_axis_label="States",
         y_axis_label="Values",
         x_range=(0, len(v_table)),
     )
     p3.vbar(x=list(range(len(v_table))), top=v_table, width=0.9)
     show(p3)
-    
-
 
 
 def plot_q_table_heatmap(q_table):
@@ -370,7 +368,7 @@ def plot_q_table_heatmap(q_table):
     :param q_table: The Q-table to visualize
     """
     plt.figure(figsize=(12, 8))
-    sns.heatmap(q_table, cmap="viridis", center=0)
+    sns.heatmap(q_table)
     plt.title("Q-table Heatmap")
     plt.xlabel("Actions")
     plt.ylabel("States")

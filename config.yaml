@@ -1,9 +1,9 @@
 state_size: 40
 action_size: 20
-k: 3
+k: 5
 theta: 3
-episodes: 250
-time_units_per_episode: 100000
+episodes: 300
+time_units_per_episode: 10000
 debug: false
 logging: false
 progress_bar: true
