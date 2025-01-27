@@ -26,6 +26,7 @@ class QLearningAgent:
         :param exploration_decay: Decay rate for exploration rate
         :param min_exploration_rate: Minimum exploration rate
         """
+        self.rng = random.default_rng()
         self.state_size = state_size
         self.action_size = action_size
         self.learning_rate = learning_rate
@@ -34,9 +35,9 @@ class QLearningAgent:
         self.exploration_rate = exploration_rate
         self.exploration_decay_parameter = exploration_decay_parameter
         self.min_exploration_rate = min_exploration_rate
-        self.q_table = np.zeros((state_size, action_size))
+        self.q_table = self.rng.random(size=(state_size, action_size))
         self.v_table = np.zeros(state_size)
-        self.rng = random.default_rng()
+        
 
     def choose_action(self, state):
         """
@@ -48,9 +49,9 @@ class QLearningAgent:
         if random.uniform(0, 1) < self.exploration_rate:
             return self.rng.integers(0, self.action_size)
         else:   
-            probs = softmax(self.q_table[state])
-            draw = self.rng.choice(self.action_size, p=probs)
-            return draw
+            maxq = np.max(self.q_table[state])
+            draw = np.where(self.q_table[state] == maxq)[0]
+            return self.rng.choice(draw)
 
     def update_q_table(self, state, action, reward, next_state):
         """

@@ -1,6 +1,6 @@
 state_size: 40
 action_size: 20
-k: 5
+k: 3
 theta: 3
 episodes: 250
 time_units_per_episode: 100000

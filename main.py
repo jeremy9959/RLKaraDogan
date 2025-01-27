@@ -318,9 +318,9 @@ def main():
 
     # Plot total rewards vs episodes
     plot_total_rewards(rewards_per_episode)
-    plot_q_table_heatmap(agent.q_table[:50, :])
+    #plot_q_table_heatmap(agent.q_table[:50, :])
     plot_v_table(agent.v_table)
-    run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
+    #run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
 
 
 def plot_total_rewards(rewards_per_episode):
