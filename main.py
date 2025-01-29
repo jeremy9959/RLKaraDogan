@@ -33,6 +33,7 @@ def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episo
         "unmet_demand": [],
     }
 
+    Q = np.zeros((agent.state_size, agent.action_size))
     for t in range(time_units_per_episode):
         # Generate demand from a gamma distribution
         demand = int(np.random.gamma(k, theta))
@@ -47,7 +48,7 @@ def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episo
         new_total_inventory, reward = supply_chain.advance_time(
             time_units=1, demand=demand, replenishment_order=action
         )
-
+        Q[state, action] = Q[state, action] + 1
         # Collect data for plotting
         episode_data["time"].append(t)
         episode_data["reward"].append(reward)
@@ -145,13 +146,27 @@ def run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episo
         alpha=0.7,
     )
 
+    p10 = figure(
+        title="Frequency of (state,order) pairs",
+        x_axis_label="State",
+        y_axis_label="Order",
+    )
+    p10.image(
+        image=[np.log(Q + 1)],
+        x=0,
+        y=0,
+        dw=Q.shape[1],
+        dh=Q.shape[0],
+        palette="Viridis256",
+    )
+
     # Combine the plots into a single layout
-    layout = column(p5, p6, p7, p8, p9)
+    layout = column(p5, p6, p7, p8, p9, p10)
 
     # Display the plots
     save(layout)
     show(layout)
-
+    print(Q)
     return episode_data
 
 
@@ -319,7 +334,7 @@ def main():
     plot_total_rewards(rewards_per_episode)
     plot_q_table_heatmap(agent.q_table[:39, :])
     plot_v_table(agent.v_table, k, theta)
-    # run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
+    run_episode_for_plotting(agent, supply_chain, k, theta, time_units_per_episode)
 
 
 def plot_total_rewards(rewards_per_episode):
